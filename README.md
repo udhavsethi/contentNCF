@@ -1,2 +1,1 @@
-# contentNCF
-Content Based NCF
+Implementation for Neural Collaborative Filtering (He et al. WWW 2017)
