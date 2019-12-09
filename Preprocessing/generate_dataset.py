@@ -55,7 +55,6 @@ for board_id, pins in board_to_pins.items():
             # find img_id corresponding to img_url
             if img_url in img_to_id:
                 img_id = img_to_id[img_url]
-                download_image(img_url, img_id)
             else:
                 img_to_id[img_url]= img_id
                 download_image(img_url, img_id)
