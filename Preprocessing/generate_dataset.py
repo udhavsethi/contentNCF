@@ -36,7 +36,9 @@ def download_image(img_url, img_id):
 img_to_id = {}
 board_to_userid = {}
 user_id = 0
-img_id = 0
+
+# image id iterator
+img_id_iter = 0
 
 filepath = './users_to_images.train'
 f = open(filepath, "w")
@@ -48,17 +50,20 @@ for board_id, pins in board_to_pins.items():
     else:
         board_to_userid[board_id] = user_id
         user_id = user_id + 1
+
     for pin in pins:
         if pin in pin_to_img:
             img_url = pin_to_img[pin]
-            
-            # find img_id corresponding to img_url
+
+            # img_id corresponding to img_url found
             if img_url in img_to_id:
                 img_id = img_to_id[img_url]
             else:
-                img_to_id[img_url]= img_id
-                download_image(img_url, img_id)
-                img_id = img_id+1            
+                # image processed for first time
+                img_id = img_id_iter
+                img_to_id[img_url] = img_id
+                # download_image(img_url, img_id)
+                img_id_iter = img_id_iter+1
 
             # write dataset to file
             f.write("{}\t{}\t{}\n".format(user_id, img_id, img_url))
