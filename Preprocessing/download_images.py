@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import requests
+import os.path
 
 def download_image(img_id, img_url):
     '''
@@ -18,13 +19,14 @@ with open(filename) as f:
 # remove whitespace characters
 lines = [x.strip() for x in lines]
 
-imgid_to_url = {}
+# imgid_to_url = {}
 
 for line in lines:
     user_id, img_id, img_url = line.split('\t')
-    if img_id in imgid_to_url:
+    if os.path.isfile('pinterest_images/{}.jpg'.format(img_id)):
+    # if image is already downloaded:
         print("Image already saved for image id: {}".format(img_id))
     else:
-        imgid_to_url[img_id] = img_url
+        # imgid_to_url[img_id] = img_url
         print("Downloading image for image id: {}".format(img_id))
         download_image(img_id, img_url)
