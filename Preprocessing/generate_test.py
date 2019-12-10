@@ -1,4 +1,4 @@
-filename = 'temp_500_users_to_images.train'
+filename = 'pinterest.data'
 
 with open(filename) as f:
     lines = f.readlines()
@@ -6,13 +6,19 @@ with open(filename) as f:
 # remove whitespace characters
 lines = [x.strip() for x in lines]
 
-NUM_TEST = 2450
+train_file = open("pinterest.train", "w")
+test_file = open("pinterest.test", "w")
 
-i=0
-test_iter=0
-while i < len(lines) and test_iter < NUM_TEST:
-    tuser_id, timg_id, timg_url = lines[i].split('\t')
-    
-    print("i: {}, tuser_id: {}, timg_id: {}".format(i, tuser_id, timg_id))
-    i = i+10
-    test_iter = test_iter+1
+# Num training samples per test sample
+EVERY_NTH_SAMPLE = 20
+
+for i in range(len(lines)):
+    user_id, img_id, img_url = lines[i].split('\t')
+    if i % EVERY_NTH_SAMPLE == 0:
+        test_file.write("{}\t{}\t{}\n".format(user_id, img_id, img_url))
+    else:
+        train_file.write("{}\t{}\t{}\n".format(user_id, img_id, img_url))
+
+
+train_file.close()
+test_file.close()
