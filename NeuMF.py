@@ -181,7 +181,7 @@ if __name__ == '__main__':
     mf_pretrain = args.mf_pretrain
     mlp_pretrain = args.mlp_pretrain
     #num_images = 20148
-    dim_f = 20
+    # dim_f = 20
 
     topK = 10
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
     #     print("Load pretrained GMF (%s) and MLP (%s) models done. " %(mf_pretrain, mlp_pretrain))
 
     # # Init performance
-    
+
     #image_f = np.zeros((121070, dim_f))
     #ordered_features = np.zeros((num_items, dim_f))
     pickle_in = open("./Data/features_20.pkl","rb")
@@ -234,8 +234,8 @@ if __name__ == '__main__':
     print('Init: HR = %.4f, NDCG = %.4f' % (hr, ndcg))
     best_hr, best_ndcg, best_iter = hr, ndcg, -1
     if args.out > 0:
-        model.save_weights(model_out_file, overwrite=True) 
-    
+        model.save_weights(model_out_file, overwrite=True)
+
     # Training model
 
 
@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
         # Load image data and create num_useritem_pairs * dim_f matrix
         num_useritem_pairs = np.array(user_input).shape[0]
-        image_f = np.zeros((num_useritem_pairs, dim_f))
+        image_f = np.zeros((num_useritem_pairs, mf_dim))
         for i in range(num_useritem_pairs):
             item_index = item_input[i]
             image_f[i] = features_20[item_index]
@@ -279,7 +279,7 @@ if __name__ == '__main__':
         if epoch %verbose == 0:
             (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, features_20, topK, evaluation_threads)
             hr, ndcg, loss = np.array(hits).mean(), np.array(ndcgs).mean(), hist.history['loss'][0]
-            print('Iteration %d [%.1f s]: HR = %.4f, NDCG = %.4f, loss = %.4f [%.1f s]' 
+            print('Iteration %d [%.1f s]: HR = %.4f, NDCG = %.4f, loss = %.4f [%.1f s]'
                   % (epoch,  t2-t1, hr, ndcg, loss, time()-t2))
             if hr > best_hr:
                 best_hr, best_ndcg, best_iter = hr, ndcg, epoch
