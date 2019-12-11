@@ -56,7 +56,7 @@ with open(file_test) as my_file:
         for item in row_z:
             f.write("\t{}".format(item))
             count = count + 1
-            if count > 10:
+            if count > 30:
                 break
         f.write("\n".format())
         print("line done")
