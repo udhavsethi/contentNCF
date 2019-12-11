@@ -51,7 +51,3 @@ features = extract_features(directory, n, d)
 
 print('Extracted Features: %d' % len(features))
 dump(features, open('./Data/features_4096.pkl', 'wb'))
-
-# pickle_in = open("features.pkl","rb")
-# features_im = pickle.load(pickle_in)
-# print(features_im[71].shape)
