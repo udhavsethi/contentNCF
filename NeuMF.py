@@ -183,7 +183,7 @@ if __name__ == '__main__':
     #num_images = 20148
     dim_f = 20
 
-    topK = 5
+    topK = 10
 
 
     evaluation_threads = 1#mp.cpu_count()
@@ -222,14 +222,20 @@ if __name__ == '__main__':
     #     print("Load pretrained GMF (%s) and MLP (%s) models done. " %(mf_pretrain, mlp_pretrain))
 
     # # Init performance
+    
+    #image_f = np.zeros((121070, dim_f))
+    #ordered_features = np.zeros((num_items, dim_f))
+    pickle_in = open("./Data/features_20.pkl","rb")
+    features_20 = pickle.load(pickle_in)
+    print("features 20 idx 0 = ", features_20[0][0])
 
-    # (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, topK, evaluation_threads)
-    # hr, ndcg = np.array(hits).mean(), np.array(ndcgs).mean()
-    # print('Init: HR = %.4f, NDCG = %.4f' % (hr, ndcg))
-    # best_hr, best_ndcg, best_iter = hr, ndcg, -1
-    # if args.out > 0:
-    #     model.save_weights(model_out_file, overwrite=True)
-
+    (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, features_20, topK, evaluation_threads)
+    hr, ndcg = np.array(hits).mean(), np.array(ndcgs).mean()
+    print('Init: HR = %.4f, NDCG = %.4f' % (hr, ndcg))
+    best_hr, best_ndcg, best_iter = hr, ndcg, -1
+    if args.out > 0:
+        model.save_weights(model_out_file, overwrite=True) 
+    
     # Training model
 
 
@@ -244,8 +250,6 @@ if __name__ == '__main__':
 
         # features_20 = num_images * 20
         # image with id i: features_20[i]
-        pickle_in = open("./Data/features_20.pkl","rb")
-        features_20 = pickle.load(pickle_in)
 
         # Load image data and create num_useritem_pairs * dim_f matrix
         num_useritem_pairs = np.array(user_input).shape[0]
@@ -272,16 +276,16 @@ if __name__ == '__main__':
         t2 = time()
 
         # Evaluation
-    #     if epoch %verbose == 0:
-    #         (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, topK, evaluation_threads)
-    #         hr, ndcg, loss = np.array(hits).mean(), np.array(ndcgs).mean(), hist.history['loss'][0]
-    #         print('Iteration %d [%.1f s]: HR = %.4f, NDCG = %.4f, loss = %.4f [%.1f s]'
-    #               % (epoch,  t2-t1, hr, ndcg, loss, time()-t2))
-    #         if hr > best_hr:
-    #             best_hr, best_ndcg, best_iter = hr, ndcg, epoch
-    #             if args.out > 0:
-    #                 model.save_weights(model_out_file, overwrite=True)
+        if epoch %verbose == 0:
+            (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, features_20, topK, evaluation_threads)
+            hr, ndcg, loss = np.array(hits).mean(), np.array(ndcgs).mean(), hist.history['loss'][0]
+            print('Iteration %d [%.1f s]: HR = %.4f, NDCG = %.4f, loss = %.4f [%.1f s]' 
+                  % (epoch,  t2-t1, hr, ndcg, loss, time()-t2))
+            if hr > best_hr:
+                best_hr, best_ndcg, best_iter = hr, ndcg, epoch
+                if args.out > 0:
+                    model.save_weights(model_out_file, overwrite=True)
 
-    # print("End. Best Iteration %d:  HR = %.4f, NDCG = %.4f. " %(best_iter, best_hr, best_ndcg))
-    # if args.out > 0:
-    #     print("The best NeuMF model is saved to %s" %(model_out_file))
+    print("End. Best Iteration %d:  HR = %.4f, NDCG = %.4f. " %(best_iter, best_hr, best_ndcg))
+    if args.out > 0:
+        print("The best NeuMF model is saved to %s" %(model_out_file))
