@@ -16,5 +16,5 @@ features_8 = pca.fit_transform(features_4096)
 
 print(features_8.shape)
 
-pickle.dump(features_20, open('./Data/features_20.pkl', 'wb'))
-pickle.dump(features_8, open('./Data/features_8.pkl', 'wb'))
+pickle.dump(features_20, open('./Data/features_20.pkl', 'wb'), protocol=2)
+pickle.dump(features_8, open('./Data/features_8.pkl', 'wb'), protocol=2)

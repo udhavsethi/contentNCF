@@ -6,7 +6,7 @@ He Xiangnan et al. Neural Collaborative Filtering. In WWW 2017.
 @author: Xiangnan He (xiangnanhe@gmail.com)
 '''
 import numpy as np
-
+import pickle
 import theano
 import theano.tensor as T
 import keras
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     mf_pretrain = args.mf_pretrain
     mlp_pretrain = args.mlp_pretrain
     #num_images = 20148
-    dim_f = 8
+    dim_f = 20
 
     topK = 5
 
@@ -240,7 +240,19 @@ if __name__ == '__main__':
         user_input, item_input, labels = get_train_instances(train, num_negatives)
 
         #####################
-        image_f = np.zeros((np.array(user_input).shape[0], dim_f))
+        # image_f = np.zeros((np.array(user_input).shape[0], dim_f))
+
+        # features_20 = num_images * 20
+        # image with id i: features_20[i]
+        pickle_in = open("./Data/features_20.pkl","rb")
+        features_20 = pickle.load(pickle_in)
+
+        # Load image data and create num_useritem_pairs * dim_f matrix
+        num_useritem_pairs = np.array(user_input).shape[0]
+        image_f = np.zeros((num_useritem_pairs, dim_f))
+        for i in range(num_useritem_pairs):
+            item_index = item_input[i]
+            image_f[i] = features_20[item_index]
         ######################
 
         print(np.array(item_input).shape)
