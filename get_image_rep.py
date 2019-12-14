@@ -18,7 +18,6 @@ def extract_features(directory,num_images, dim_images):
     model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
     print(model.summary())
 
-    #features = dict()
     features = np.zeros((num_images, dim_images))
     try:
         for name in listdir(directory):
