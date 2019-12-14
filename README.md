@@ -1,7 +1,7 @@
-# Neural Collaborative Filtering
+# Content Based Neural Collaborative Filtering
 Content-based Neural Collaborative Filtering: https://github.com/udhavsethi/neural_collaborative_filtering
 
-# Our project is forked from the NCF repository: https://github.com/hexiangnan/neural_collaborative_filtering
+Our project is forked from the NCF repository: https://github.com/hexiangnan/neural_collaborative_filtering
 
 ## Environment Settings
 Keras with Theano backend.
