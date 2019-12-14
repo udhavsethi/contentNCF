@@ -14,7 +14,6 @@ from evaluate import evaluate_model
 from Dataset import Dataset
 from time import time
 import sys
-import GMF, MLP
 import argparse
 
 #################### Arguments ####################
@@ -61,28 +60,21 @@ def get_model(num_users, num_items, mf_dim=10, layers=[10], reg_layers=[0], reg_
     # Input variables
     user_input = Input(shape=(1,), dtype='int32', name = 'user_input')
     item_input = Input(shape=(mf_dim,), dtype='float32', name = 'item_input')
-    #image_f = Input(shape=(num_items, mf_dim), dtype='int32', name = 'item_features')
 
     # Embedding layer
     MF_Embedding_User = Embedding(input_dim = num_users, output_dim = mf_dim, name = 'mf_embedding_user',
                                   init = init_normal, W_regularizer = l2(reg_mf), input_length=1)
-    #MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = mf_dim, name = 'mf_embedding_item',
-    #                              init = init_normal, W_regularizer = l2(reg_mf), input_length=1)
 
     inter_layer = Dense(mf_dim, activation='sigmoid', init='lecun_uniform', name = "inter_layer")
 
 
     MLP_Embedding_User = Embedding(input_dim = num_users, output_dim = layers[0]/2, name = "mlp_embedding_user",
                                   init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)
-    #MLP_Embedding_Item = Embedding(input_dim = num_items, output_dim = layers[0]/2, name = 'mlp_embedding_item',
-    #                              init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)
 
     inter_layer2 = Dense(layers[0]/2, activation='sigmoid', init='lecun_uniform', name = "inter_layer2")
 
     # MF part
     mf_user_latent = Flatten()(MF_Embedding_User(user_input))
-    #mf_item_latent = Flatten()(MF_Embedding_Item(item_input))
-    #mf_vector = merge([mf_user_latent, mf_item_latent], mode = 'mul') # element-wise multiply
 
     mf_item_latent = inter_layer(item_input)
     mf_vector = merge([mf_user_latent, mf_item_latent], mode = 'mul') # element-wise multiply
@@ -90,8 +82,6 @@ def get_model(num_users, num_items, mf_dim=10, layers=[10], reg_layers=[0], reg_
 
     # MLP part
     mlp_user_latent = Flatten()(MLP_Embedding_User(user_input))
-    #mlp_item_latent = Flatten()(MLP_Embedding_Item(item_input))
-    #mlp_vector = merge([mlp_user_latent, mlp_item_latent], mode = 'concat')
 
     mlp_item_latent = inter_layer2(item_input)
     mlp_vector = merge([mf_user_latent, mf_item_latent], mode = 'mul') # element-wise multiply
@@ -102,8 +92,6 @@ def get_model(num_users, num_items, mf_dim=10, layers=[10], reg_layers=[0], reg_
         mlp_vector = layer(mlp_vector)
 
     # Concatenate MF and MLP parts
-    #mf_vector = Lambda(lambda x: x * alpha)(mf_vector)
-    #mlp_vector = Lambda(lambda x : x * (1-alpha))(mlp_vector)
     predict_vector = merge([mf_vector, mlp_vector], mode = 'concat')
 
     # Final prediction layer
@@ -173,13 +161,10 @@ if __name__ == '__main__':
     verbose = args.verbose
     mf_pretrain = args.mf_pretrain
     mlp_pretrain = args.mlp_pretrain
-    #num_images = 20148
-    # dim_f = 20
-
     topK = 10
 
 
-    evaluation_threads = 1#mp.cpu_count()
+    evaluation_threads = 1  #mp.cpu_count()
     print("NeuMF arguments: %s " %(args))
     model_out_file = 'Pretrain/%s_NeuMF_%d_%s_%d.h5' %(args.dataset, mf_dim, args.layers, time())
 
@@ -205,44 +190,21 @@ if __name__ == '__main__':
     else:
         model.compile(optimizer=SGD(lr=learning_rate), loss='binary_crossentropy')
 
-    # # Load pretrain model
-    # if mf_pretrain != '' and mlp_pretrain != '':
-    #     gmf_model = GMF.get_model(num_users,num_items, mf_dim)
-    #     gmf_model.load_weights(mf_pretrain)
-    #     mlp_model = MLP.get_model(num_users,num_items, layers, reg_layers)
-    #     mlp_model.load_weights(mlp_pretrain)
-    #     model = load_pretrain_model(model, gmf_model, mlp_model, len(layers))
-    #     print("Load pretrained GMF (%s) and MLP (%s) models done. " %(mf_pretrain, mlp_pretrain))
-
-    # # Init performance
-
-    #image_f = np.zeros((121070, dim_f))
-    #ordered_features = np.zeros((num_items, dim_f))
+    # load pre-saved image feature data
     pickle_in = open("./Data/features_20.pkl","rb")
     features_20 = pickle.load(pickle_in)
-    print("features 20 idx 0 = ", features_20[0][0])
 
     (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, features_20, topK, evaluation_threads)
     hr, ndcg = np.array(hits).mean(), np.array(ndcgs).mean()
-    print('Init: HR = %.4f, NDCG = %.4f' % (hr, ndcg))
     best_hr, best_ndcg, best_iter = hr, ndcg, -1
     if args.out > 0:
         model.save_weights(model_out_file, overwrite=True)
 
     # Training model
-
-
-
     for epoch in xrange(num_epochs):
         t1 = time()
         # Generate training instances
         user_input, item_input, labels = get_train_instances(train, num_negatives)
-
-        #####################
-        # image_f = np.zeros((np.array(user_input).shape[0], dim_f))
-
-        # features_20 = num_images * 20
-        # image with id i: features_20[i]
 
         # Load image data and create num_useritem_pairs * dim_f matrix
         num_useritem_pairs = np.array(user_input).shape[0]
@@ -250,17 +212,6 @@ if __name__ == '__main__':
         for i in range(num_useritem_pairs):
             item_index = item_input[i]
             image_f[i] = features_20[item_index]
-        ######################
-
-        print(np.array(item_input).shape)
-        print(np.array(user_input).shape)
-        print(len(item_input))
-        print(image_f.shape)
-
-        # Training
-        #hist = model.fit([np.array(user_input), image_f], #input
-        #                 np.array(labels), # labels
-        #                 batch_size=batch_size, verbose=0, shuffle=True)
 
         hist = model.fit([np.array(user_input), image_f], #input
                          np.array(labels), # labels
