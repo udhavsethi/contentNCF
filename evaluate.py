@@ -1,12 +1,3 @@
-'''
-Created on Apr 15, 2016
-Evaluate the performance of Top-K recommendation:
-    Protocol: leave-1-out evaluation
-    Measures: Hit Ratio and NDCG
-    (more details are in: Xiangnan He, et al. Fast Matrix Factorization for Online Recommendation with Implicit Feedback. SIGIR'16)
-
-@author: hexiangnan
-'''
 import math
 import heapq # for retrieval topK
 import multiprocessing
@@ -36,7 +27,7 @@ def evaluate_model(model, testRatings, testNegatives, testImFeatures, K, num_thr
     _testNegatives = testNegatives
     _testImFeatures = testImFeatures
     _K = K
-        
+
     hits, ndcgs = [],[]
     if(num_thread > 1): # Multi-thread
         pool = multiprocessing.Pool(processes=num_thread)
@@ -50,7 +41,7 @@ def evaluate_model(model, testRatings, testNegatives, testImFeatures, K, num_thr
     for idx in xrange(len(_testRatings)):
         (hr,ndcg) = eval_one_rating(idx)
         hits.append(hr)
-        ndcgs.append(ndcg)      
+        ndcgs.append(ndcg)
     return (hits, ndcgs)
 
 def eval_one_rating(idx):
@@ -70,7 +61,7 @@ def eval_one_rating(idx):
     map_item_score = {}
     users = np.full(len(item_features), u, dtype = 'int32')
     # print "item shape: " + str(np.shape(item_features))
-    predictions = _model.predict([users, np.array(item_features)], 
+    predictions = _model.predict([users, np.array(item_features)],
                                  batch_size=100, verbose=0)
     # print("evaluating for " + str(idx))
     # print "prediction length: " + str(predictions.shape)
@@ -78,7 +69,7 @@ def eval_one_rating(idx):
         # item_feat = item_features[i]
         map_item_score[items[i]] = predictions[i]
     item_features.pop()
-    
+
     # Evaluate top rank list
     ranklist = heapq.nlargest(_K, map_item_score, key=map_item_score.get)
     hr = getHitRatio(ranklist, gtItem)
