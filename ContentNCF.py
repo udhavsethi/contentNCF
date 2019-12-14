@@ -191,7 +191,7 @@ if __name__ == '__main__':
         model.compile(optimizer=SGD(lr=learning_rate), loss='binary_crossentropy')
 
     # load pre-saved image feature data
-    pickle_in = open("./Data/features_20.pkl","rb")
+    pickle_in = open("./Data/features_64.pkl","rb")
     features_20 = pickle.load(pickle_in)
 
     (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, features_20, topK, evaluation_threads)
